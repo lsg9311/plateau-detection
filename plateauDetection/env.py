@@ -1,3 +1,5 @@
+import configparser
+
 class Env(object):
     """
     Enviroment of this model
@@ -13,17 +15,35 @@ class Env(object):
         array of feature string 
     """
     def __init__(self):
-        self.train_file=[]
-        self.test_file=[]
-        self.feature=["datetime","icp"]
+        self.path={"training_path":"","test_path":"","lable_path":"",
+                   "model_load_path":"","weight_load_path":"",
+                   "model_save_path":"","weight_save_path":""}
+        self.file={"train_file":[],"test_file":[]}
+        self.data={"feature" : []}
+        self.model={"epoch" : 50, "batch_size" : 1000}
+
+    def load_config(self,config_path):
+        """
+        load environment variable from config.ini
+
+        Parameter
+        _________
+        config_path : string
+            configuration file path 
+        """
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        print(config.sections())
 
     def set_env(self):
         """
         set environment variable by using user input
         """
-        menu=int_input("0: Set Feature")
+        menu=int_input("0: Set Feature / 1: Set time slice")
         if menu==0:
             self._set_feature()
+        elif menu==1:
+            self.time_slice=int_input("time slice?")
 
     def _set_feature(self):
         """
