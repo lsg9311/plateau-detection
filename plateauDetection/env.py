@@ -17,6 +17,7 @@ class Env(object):
     def __init__(self):
         self.config_var={}
         self.file={}
+        self.labeldata=[]
         
     def load_config(self,config_path):
         """
