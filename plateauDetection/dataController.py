@@ -1,5 +1,6 @@
 import numpy as np
 import loader as ld
+import labelling as lb
 import dataTransform as dt
 from sklearn.preprocessing import MinMaxScaler
 
@@ -102,16 +103,17 @@ def make_test_file(filepath,env):
     -------
     X : 3d matrix (batch_size,timestep(=lookback),1(=feature))
         matrix of X which can be used for LSTM model
+    dataX : matrix (feature * timestep)
+        original data X
     '''
     config=env.config_var
     # load data
     dataX=ld.get_data(filepath,config["data"]["feature"])
     # simplify data
-    dataX=dt.mean_simplify(dataX,len(config["data"]["feature"]),config["data"]["time_slice"])
+    dataX=dt.mean_simplify(dataX,len(config["data"]["feature"]),int(config["data"]["time_slice"]))
     # labeling
-    labeldata=lb.load_label(config["path"]["label_path"])
     dataY=lb.data_labeling(dataX,filepath,env.labeldata)
     # make LSTM data
-    X,Y=make_LSTM_data(dataX,dataY,config["data"]["look_back"])
+    X,Y=make_LSTM_data(dataX,dataY,int(config["data"]["look_back"]))
 
-    return X
+    return X,dataX

@@ -28,6 +28,7 @@ def mean_simplify(data,feature_size,time_slice):
     mean_val= np.zeros(feature_size)
 
     total_len=len(data.T);    cur_slice=0;
+    
     for cur_time in range(0,total_len):
         # save & initialize
         if cur_slice==time_slice:
@@ -46,7 +47,7 @@ def mean_simplify(data,feature_size,time_slice):
     
     # save cur time slice result
     for feature_num in range(feature_size):
-        mean_features[feature_num].append(mean_val[feature_num]/time_slice)
+        mean_features[feature_num].append(mean_val[feature_num]/cur_slice)
     result=np.array(mean_features)
     
     return result

@@ -19,7 +19,7 @@ if __name__ == '__main__':
     train_file,test_file,datadict=ld.data_load(config) # ./data = data file directory
     env.file["train_file"]=train_file
     env.file["test_file"]=test_file
-
+    
     menu=int_input("0 : Load trained model / 1 : Generate new model")
     if menu==0:
         model=mc.load_model(config["path"]["model_load_path"],config["path"]["weight_load_path"])
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         datadict=dt.transfrom_dataset(datadict,len(config["data"]["feature"]),int(config["data"]["time_slice"]))
     
         print("Labeling")
-        env.labeldata=lb.load_label(env.config_var["path"]["label_path"])
+        env.labeldata=lb.load_label(config["path"]["label_path"])
         labeldict=lb.dataset_labelling(datadict,env.file["train_file"],env.labeldata)
     
         print("Make XY")
@@ -42,7 +42,5 @@ if __name__ == '__main__':
         mc.save_model(model,config["path"]["model_save_path"],config["path"]["weight_save_path"])
     else:
         print("wrong input")
-    '''
     print("Evaluation")
-    mc.evaluate(model,test_file)
-    '''
+    mc.evaluate(model,env)

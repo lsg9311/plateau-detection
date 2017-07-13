@@ -1,14 +1,13 @@
 import tensorflow
 import dataController as dc
 import numpy as np
+import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Bidirectional
 from keras.layers import LSTM,GRU
 from keras.models import model_from_json
 
 from env import Env
-import matplotlib.pyplot as plt
-
 import pickle
 
 def generate_model(cell_num=32,dropout=0.3,look_back=20):
@@ -137,30 +136,39 @@ def _refine_Y(Y,threshold=0.5):
         Y[i]= 1 if cur_y>threshold else 0
     return Y
 
-def prediction_result(model,testX,threshold):
+
+def evaluate(model,env):
     '''
-    evaluate model by using one data(=testX)
+    evaluate model by drawing graph of test data
+    1. make test file
+    2. prediction
+    3. store graph
+    4. show entire result
 
     Parameters
     ----------
     model : keras model
         trained model
-    testX : 3d matrix (batch_size,timestep(=lookback),1(=feature))
-        matrix of testX
-    Returns
-    -------
-    Y : array
-        refined binary Y (0 or 1)
+    env : Env
+        Environment of this system
     '''
-
-    Y=model.pred(testX)
-    Y=_refine_Y(Y,threshold)
-    return Y
-
-def evaluate(model,env):
+    figure_num=0
+    figure_range=4
     testlist=env.file["test_file"]
-    for testfile in testlist:
-        testX=dc.make_test_file(testfile,env)
-        Y=model.pred(testX)
-        Y=_refine_Y(Y,env.config_var["model"]["threshold"])
-   
+    for test_idx in range(len(testlist)):
+        if test_idx%figure_range==0:
+            figure_num=figure_num+1
+            plt.figure(figure_num,figsize=(12,5*figure_range))
+        plt.subplot(4*100+10+((test_idx%figure_range)+1))
+        testfile=testlist[test_idx]
+        testX,dataX=dc.make_test_file(testfile,env)
+        predY=model.predict(testX)
+        predY=_refine_Y(predY,float(env.config_var["model"]["threshold"]))
+        predY=predY*max(dataX[1])
+
+        look_back=int(env.config_var["data"]["look_back"])
+        plt.plot(dataX[0][look_back:],dataX[1][look_back:],'b',label="ICP")
+        plt.plot(dataX[0][look_back:],predY.reshape(-1),'r',label="prediction")
+        plt.grid()
+        plt.legend()
+    plt.show()
