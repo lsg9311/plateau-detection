@@ -15,11 +15,9 @@ class Env(object):
         array of feature string 
     """
     def __init__(self):
-        self.path={}
+        self.config_var={}
         self.file={}
-        self.data={}
-        self.model={}
-
+        
     def load_config(self,config_path):
         """
         load environment variable from config.ini
@@ -31,9 +29,16 @@ class Env(object):
         """
         config = configparser.ConfigParser()
         config.read(config_path)
-        self.path=config["path"]
-        self.data=config["data"]
-        self.model=config["model"]
+
+        for section in config.sections():
+            self.config_var[section]={}
+            for option in config.options(section):
+               self.config_var[section][option]=config.get(section,option)
+        
+        
+        feature_list=self.config_var["data"]["feature"].split(",")
+        self.config_var["data"]['feature']=feature_list
+        
 
 
 def int_input(message=""):

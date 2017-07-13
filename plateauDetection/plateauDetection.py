@@ -12,14 +12,17 @@ if __name__ == '__main__':
     env=Env()
     env.load_config("./config.ini")
 
+    config=env.config_var
+
     print("Start Operation")
     print("(1) Load Data")
-    train_file,test_file,datadict=ld.data_load(env) # ./data = data file directory
+    train_file,test_file,datadict=ld.data_load(config) # ./data = data file directory
     env.file["train_file"]=train_file
     env.file["test_file"]=test_file
 
+
     print("(2) Transform Data")
-    datadict=dt.transfrom_dataset(datadict,len(env.data["feature"]),env.data["time_slice"])
+    datadict=dt.transfrom_dataset(datadict,len(config["data"]["feature"]),int(config["data"]["time_slice"]))
     
     print("(3) Labeling")
 

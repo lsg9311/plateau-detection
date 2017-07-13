@@ -145,10 +145,10 @@ def data_load(env):
         data dictionary of trainset
     """
     # 1-1 : load the filelist from data directory
-    trainlist=_get_filelist(env.path["training_path"])
-    testlist=_get_filelist(env.path["test_path"])
+    trainlist=_get_filelist(env["path"]["training_path"])
+    testlist=_get_filelist(env["path"]["test_path"])
     # 1-2 : set feature
-    feature=env.data["feature"]
+    feature=env["data"]["feature"]
     # 1-3 : maek dictionary from trainset
     datadict=get_data_from_filelist(trainlist,feature)
 
