@@ -40,7 +40,7 @@ if __name__ == '__main__':
             trainX,trainY=dc.make_LSTM_dataset(datadict,labeldict,int(config["data"]["look_back"]))
 
             print("Generate Model")
-            model=mc.generate_model(int(config["model"]["cell_num"]),float(config["model"]["dropout"]),int(config["data"]["look_back"]),int(config["model"]["LSTM_layer"]))
+            model=mc.generate_model(int(config["model"]["cell_num"]),float(config["model"]["dropout"]),int(config["data"]["look_back"]),int(config["model"]["layer"]))
             print("Train Model")
             mc.training_model(model,trainX,trainY,epochs=int(config["model"]["epoch"]))
             print("Save Model")
