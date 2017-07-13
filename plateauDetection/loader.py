@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+from env import Env
 from env import int_input
 
 def get_data_from_filelist(filelist,feature=[]):
@@ -148,7 +149,7 @@ def _split_path(filelist):
     return trainpath,testpath
 
 
-def data_load(datadir):
+def data_load(datadir,env):
     """
     Operate data loader
     1. load filelist
@@ -160,6 +161,8 @@ def data_load(datadir):
     ----------
     datadir : string
         directory of data
+    env : Env
+        model enviroment
     Returns
     -------
     trainlist : array
@@ -174,7 +177,7 @@ def data_load(datadir):
     # 1-2 : set train size
     trainlist,testlist=_split_path(filelist)
     # 1-3 : set feature
-    feature=["datetime","icp"]
+    feature=env.feature
     # 1-4 : maek dictionary from trainset
     datadict=get_data_from_filelist(trainlist,feature)
 

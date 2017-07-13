@@ -4,14 +4,24 @@ import loader as ld
 # import dataController as dc
 # import modelController as mc
 
+from env import Env
+from env import int_input
 
 if __name__ == '__main__':
     dataset=[] # training data
     labelset=[] # training label (0: normal / 1: plateau)
     model=[]
+    env=Env()
+
+    menu=-1
+    while menu!=1:
+        menu=int_input("1. Operation start / 0. Set Environment ")
+        if menu==0:
+            env.set_env()
+
     print("Start Operation")
-    print("1. Load Data")
-    train_file,test_file,datadict=ld.data_load("./data") # ./data = data file directory
+    print("(1) Load Data")
+    train_file,test_file,datadict=ld.data_load("./data",env) # ./data = data file directory
     print(datadict)
     '''
     print("2. Transform Data")

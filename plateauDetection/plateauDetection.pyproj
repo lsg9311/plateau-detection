@@ -26,6 +26,9 @@
     <Compile Include="dataController.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="dataTransform.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="env.py">
       <SubType>Code</SubType>
     </Compile>
