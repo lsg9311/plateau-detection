@@ -15,12 +15,10 @@ class Env(object):
         array of feature string 
     """
     def __init__(self):
-        self.path={"training_path":"","test_path":"","lable_path":"",
-                   "model_load_path":"","weight_load_path":"",
-                   "model_save_path":"","weight_save_path":""}
-        self.file={"train_file":[],"test_file":[]}
-        self.data={"feature" : []}
-        self.model={"epoch" : 50, "batch_size" : 1000}
+        self.path={}
+        self.file={}
+        self.data={}
+        self.model={}
 
     def load_config(self,config_path):
         """
@@ -33,29 +31,9 @@ class Env(object):
         """
         config = configparser.ConfigParser()
         config.read(config_path)
-        print(config.sections())
-
-    def set_env(self):
-        """
-        set environment variable by using user input
-        """
-        menu=int_input("0: Set Feature / 1: Set time slice")
-        if menu==0:
-            self._set_feature()
-        elif menu==1:
-            self.time_slice=int_input("time slice?")
-
-    def _set_feature(self):
-        """
-        set feature which will be selected from original data
-        previous information will be deleted
-        """
-        self.feature=[]
-        feature_name=""
-        while feature_name!="q":
-            print("Input Feature Name (Quit : q) ")
-            feature_name=input()
-            self.feature.append(feature_name)
+        self.path=config["path"]
+        self.data=config["data"]
+        self.model=config["model"]
 
 
 def int_input(message=""):

@@ -11,24 +11,17 @@ from env import int_input
 if __name__ == '__main__':
     env=Env()
     env.load_config("./config.ini")
-    '''
-    menu=-1
-    while menu!=1:
-        menu=int_input("1. Operation start / 0. Set Environment ")
-        if menu==0:
-            env.set_env()
 
     print("Start Operation")
     print("(1) Load Data")
-    train_file,test_file,datadict=ld.data_load("./data",env) # ./data = data file directory
-    env.train_file=train_file
-    env.test_file=test_file
+    train_file,test_file,datadict=ld.data_load(env) # ./data = data file directory
+    env.file["train_file"]=train_file
+    env.file["test_file"]=test_file
 
     print("(2) Transform Data")
-    datadict=dt.transfrom_dataset(datadict,len(env.feature),env.time_slice)
+    datadict=dt.transfrom_dataset(datadict,len(env.data["feature"]),env.data["time_slice"])
     
     print("(3) Labeling")
-    '''
 
     '''
     print("3. Labeling")

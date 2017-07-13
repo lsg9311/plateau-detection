@@ -124,43 +124,15 @@ def _get_filelist(dirname):
     
     return filelist
 
-def _split_path(filelist):
-    """
-    get filepath list of training data & test data by using user input
-
-    Parameters
-    ----------
-    filelist : array
-        list of all filepath
-    Returns
-    -------
-    trainpath : array
-        list of train filepath
-    testpath : array
-        list of test filepath
-    """
-    train_size=5
-    # train set = 0 ~ train_size
-    # should be changed
-    train_size=int_input("train_size?")
-    trainpath=filelist[0:train_size]
-    testpath=filelist[train_size:len(filelist)]
-
-    return trainpath,testpath
-
-
-def data_load(datadir,env):
+def data_load(env):
     """
     Operate data loader
     1. load filelist
-    2. split trainset
-    3. set feature
-    4. make data dictionary from train filelist
+    2. set feature
+    3. make data dictionary from train filelist
 
     Parameters
     ----------
-    datadir : string
-        directory of data
     env : Env
         model enviroment
     Returns
@@ -173,12 +145,11 @@ def data_load(datadir,env):
         data dictionary of trainset
     """
     # 1-1 : load the filelist from data directory
-    filelist=_get_filelist(datadir)
-    # 1-2 : set train size
-    trainlist,testlist=_split_path(filelist)
-    # 1-3 : set feature
-    feature=env.feature
-    # 1-4 : maek dictionary from trainset
+    trainlist=_get_filelist(env.path["training_path"])
+    testlist=_get_filelist(env.path["test_path"])
+    # 1-2 : set feature
+    feature=env.data["feature"]
+    # 1-3 : maek dictionary from trainset
     datadict=get_data_from_filelist(trainlist,feature)
 
     return trainlist, testlist, datadict
