@@ -6,6 +6,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.csv
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -44,6 +45,10 @@ dlldata.c
 project.lock.json
 project.fragment.lock.json
 artifacts/
+
+# data
+data/
+Plateau Info.csv
 
 *_i.c
 *_p.c
