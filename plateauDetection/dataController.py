@@ -1,4 +1,6 @@
 import numpy as np
+import loader as ld
+import dataTransform as dt
 from sklearn.preprocessing import MinMaxScaler
 
 def scaling_data(data):
@@ -85,3 +87,31 @@ def make_LSTM_dataset(datadict,labeldict,look_back):
         Xdict[filenum],Ydict[filenum]=make_LSTM_data(data,label,look_back)
 
     return Xdict, Ydict
+
+def make_test_file(filepath,env):
+    '''
+    make test file into X for LSTM model 
+    
+    Parameters
+    ----------
+    filepath : string
+        filepath of current test data
+    env : Env
+        Environment of system
+    Returns
+    -------
+    X : 3d matrix (batch_size,timestep(=lookback),1(=feature))
+        matrix of X which can be used for LSTM model
+    '''
+    config=env.config_var
+    # load data
+    dataX=ld.get_data(filepath,config["data"]["feature"])
+    # simplify data
+    dataX=dt.mean_simplify(dataX,len(config["data"]["feature"]),config["data"]["time_slice"])
+    # labeling
+    labeldata=lb.load_label(config["path"]["label_path"])
+    dataY=lb.data_labeling(dataX,filepath,env.labeldata)
+    # make LSTM data
+    X,Y=make_LSTM_data(dataX,dataY,config["data"]["look_back"])
+
+    return X
