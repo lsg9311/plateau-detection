@@ -1,17 +1,18 @@
 import os
 import pandas as pd
 import numpy as np
+from env import int_input
 
-def get_data_from_filelist(filelist,selector=[]):
+def get_data_from_filelist(filelist,feature=[]):
     """    
     Load csv files from filelist
-    if selector is set, data will be filtered
+    if feature is set, data will be filtered
 
     Parameters
     ----------
     filelist : array
         Filepath array
-    selector : array
+    feature : array
         Selected column name array
 
     Returns
@@ -28,19 +29,19 @@ def get_data_from_filelist(filelist,selector=[]):
     datadict=dict()
     for filenum in len(filelist):
         file=filelist[filenum]
-        dataset[filenum]=get_data(file,selector)
+        dataset[filenum]=get_data(file,feature)
     return datadict
 
-def get_data(filename,selector=[]):
+def get_data(filename,feature=[]):
     """
     Load csv file from filename
-    if selector is set, data will be filtered
+    if feature is set, data will be filtered
 
     Parameters
     ----------
     filename : string
         Filepath String
-    selector : array
+    feature : array
         Selected column name array
 
     Returns
@@ -57,21 +58,21 @@ def get_data(filename,selector=[]):
     df=pd.read_csv(filename)
     # when filter is set
     if len(col_names)>0:
-        df=df_filtering(df,selector)
+        df=df_filtering(df,feature)
     data=df.as_matrix().T
  
     return data
 
-def df_filtering(df,selector=[]):
+def df_filtering(df,feature=[]):
     """ 
-    Select the dataframe column by looking up selector
+    Select the dataframe column by looking up feature
     NaN value will be erased
 
     Parameters
     ----------
     df : dataframe
         Original Pandas DataFrame
-    selector : array
+    feature : array
         Selected column name array
 
     Returns
@@ -79,25 +80,25 @@ def df_filtering(df,selector=[]):
     result_df : dataframe
         Selected DataFrame
     """
-    # selected index = column indexes having selector name
+    # selected index = column indexes having feature name
     selected_idx=[]
     # get column names from dataframe
     df_colname=df.columns.values
 
-    # Find index of selector 
+    # Find index of feature 
     for i in range(len(df_colname)):
         cur_col=df_colname[i]
         cur_col=cur_col.lower()
-        # compare cur_col & col_name in selector
-        for col_name in selector:
-            # if dataframe column has one string of selector array
+        # compare cur_col & col_name in feature
+        for col_name in feature:
+            # if dataframe column has one string of feature array
             if col_name in cur_col:
                 selected_idx.append(i)
                 break;
     result_df=df.iloc[:,selected_idx].dropna()
     return result_df
 
-def get_filelist(dirname):
+def _get_filelist(dirname):
     """ 
     Get filepath list in input directory
 
@@ -114,23 +115,72 @@ def get_filelist(dirname):
     # get all file path in directory
     filenames = os.listdir(dirname)
     filelist=[]
+
     # concatenate dirname + filename
     for filename in filenames:
         full_filename = os.path.join(dirname, filename)
         filelist.append(full_filename)
+    
     return filelist
 
+def _split_path(filelist):
+    """
+    get filepath list of training data & test data by using user input
+
+    Parameters
+    ----------
+    filelist : array
+        list of all filepath
+    Returns
+    -------
+    trainpath : array
+        list of train filepath
+    testpath : array
+        list of test filepath
+    """
+    train_size=5
+    # train set = 0 ~ train_size
+    # should be changed
+    train_size=int_input("train_size?")
+    trainpath=filelist[0:train_size]
+    testpath=filelist[train_size:len(filelist)]
+
+    return trainpath,testpath
 
 
+def data_load(datadir):
+    """
+    Operate data loader
+    1. load filelist
+    2. split trainset
+    3. set feature
+    4. make data dictionary from train filelist
 
-
-
-
-
+    Parameters
+    ----------
+    datadir : string
+        directory of data
+    Returns
+    -------
+    trainlist : array
+        array of trainset filepath
+    testlist : array
+        array of testset filepath
+    datadict : dictionary
+        data dictionary of trainset
+    """
+    # 1-1 : load the filelist from data directory
+    filelist=_get_filelist(datadir)
+    # 1-2 : set train size
+    trainlist,testlist=_get_trainpath(filelist)
+    # 1-3 : set feature
+    feature=["datetime","icp"]
+    # 1-4 : maek dictionary from trainset
+    datadict=get_data_from_filelist(trainlist,feature)
 
 
 # step1 : Load data
-def data_load(datadir):
+def op(datadir):
     """Load raw csv files from data directory
 
     Parameters
@@ -155,8 +205,7 @@ def data_load(datadir):
         Instantaneous heart rate (bpm).
     """
 
-    # 1-1 : load the filelist from data directory
-    filelist=search(datadir)
+   
     # 1-2 : set train size
     '''
     print("File List ) ")
