@@ -2,7 +2,7 @@
 import loader as ld
 import dataTransform as dt
 import labelling as lb
-# import dataController as dc
+import dataController as dc
 # import modelController as mc
 
 from env import Env
@@ -27,14 +27,13 @@ if __name__ == '__main__':
     print("(3) Labeling")
     env.labeldata=lb.load_label(env.config_var["path"]["label_path"])
     labeldict=lb.dataset_labelling(datadict,env.file["train_file"],env.labeldata)
-    print(labeldict)
-
-    '''
     
-    print("4. Make XY")
-    trainX,trainY=dc.makeChunkedXY(dataset,labelset,feature=1,look_back=20) # 1=icp feature, 20=lookback(=timestep)
+    print("(4) Make XY")
+    trainX,trainY=dc.make_LSTM_dataset(datadict,labeldict,int(config["data"]["look_back"]))
+    
     print("5. Select Model")
-    model=mc.make_model(trainX,trainY)
+    #model=mc.make_model(trainX,trainY)
+    '''
     print("6. Evaluation")
     mc.evaluate(model,test_file)
     '''
