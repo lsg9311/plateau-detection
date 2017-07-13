@@ -1,9 +1,8 @@
 # custome module
 import loader as ld
-import labelling as lb
-import dataController as dc
-import modelController as mc
-import matplotlib.pyplot as plt
+# import labelling as lb
+# import dataController as dc
+# import modelController as mc
 
 
 if __name__ == '__main__':
@@ -12,7 +11,9 @@ if __name__ == '__main__':
     model=[]
     print("Start Operation")
     print("1. Load Data")
-    train_file,test_file,dataset=ld.data_load("./data") # ./data = data file directory
+    train_file,test_file,datadict=ld.data_load("./data") # ./data = data file directory
+    print(datadict)
+    '''
     print("2. Transform Data")
     dataset=dc.transform_dataset(dataset)
     print("3. Labeling")
@@ -24,3 +25,4 @@ if __name__ == '__main__':
     model=mc.make_model(trainX,trainY)
     print("6. Evaluation")
     mc.evaluate(model,test_file)
+    '''

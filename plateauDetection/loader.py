@@ -27,9 +27,9 @@ def get_data_from_filelist(filelist,feature=[]):
 
     # fill data dictionary
     datadict=dict()
-    for filenum in len(filelist):
+    for filenum in range(len(filelist)):
         file=filelist[filenum]
-        dataset[filenum]=get_data(file,feature)
+        datadict[filenum]=get_data(file,feature)
     return datadict
 
 def get_data(filename,feature=[]):
@@ -57,7 +57,7 @@ def get_data(filename,feature=[]):
     # load csv file by using pandas
     df=pd.read_csv(filename)
     # when filter is set
-    if len(col_names)>0:
+    if len(feature)>0:
         df=df_filtering(df,feature)
     data=df.as_matrix().T
  
@@ -172,67 +172,10 @@ def data_load(datadir):
     # 1-1 : load the filelist from data directory
     filelist=_get_filelist(datadir)
     # 1-2 : set train size
-    trainlist,testlist=_get_trainpath(filelist)
+    trainlist,testlist=_split_path(filelist)
     # 1-3 : set feature
     feature=["datetime","icp"]
     # 1-4 : maek dictionary from trainset
     datadict=get_data_from_filelist(trainlist,feature)
 
-
-# step1 : Load data
-def op(datadir):
-    """Load raw csv files from data directory
-
-    Parameters
-    ----------
-    datadir : string
-        directory 
-    Returns
-    -------
-    ts : array
-        Signal time axis reference (seconds).
-    filtered : array
-        Filtered ECG signal.
-    rpeaks : array
-        R-peak location indices.
-    templates_ts : array
-        Templates time axis reference (seconds).
-    templates : array
-        Extracted heartbeat templates.
-    heart_rate_ts : array
-        Heart rate time axis reference (seconds).
-    heart_rate : array
-        Instantaneous heart rate (bpm).
-    """
-
-   
-    # 1-2 : set train size
-    '''
-    print("File List ) ")
-    print(filelist)'''
-    train_size=5
-    
-    print("Set train size")
-    train_size=int(input())
-    
-    # 1-3 : split train_file & test_file
-    train_file=filelist[0:train_size]
-    test_file=filelist[train_size:len(filelist)] # have to store
-
-    # 1-4 : load train data
-    col_names=["datetime","icp"]
-    '''print("Select Column")
-    col_names=input()
-    col_names=col_names.split(",")'''
-
-    dataset=dict()
-    for i in range(len(train_file)):
-        cur_file=train_file[i]
-        # cur_file=os.path.join(datadir, cur_file)
-        data=get_data(cur_file,col_names)
-        dataset[i]=data
-    return train_file,test_file,dataset
-
-
-
-
+    return trainlist, testlist, datadict
