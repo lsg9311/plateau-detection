@@ -10,7 +10,7 @@ from keras.models import model_from_json
 from env import Env
 import pickle
 
-def generate_model(cell_num=32,dropout=0.3,look_back=20):
+def generate_model(cell_num=32,dropout=0.3,look_back=20,layer_num=3):
     '''
     generate the model by looking up config variable
 
@@ -22,6 +22,8 @@ def generate_model(cell_num=32,dropout=0.3,look_back=20):
         dropout rate
     look_back : int, option
         length of X sequence
+    layer_num : int, option
+        # of LSTM layer
     Returns
     -------
     model : keras model
@@ -30,13 +32,19 @@ def generate_model(cell_num=32,dropout=0.3,look_back=20):
     model = Sequential()
     model.add(Bidirectional(GRU(cell_num,return_sequences=True),input_shape=(look_back, 1)))
     model.add(Dropout(dropout))
-    model.add(Bidirectional(GRU(cell_num,return_sequences=True)))
-    model.add(Dropout(dropout))
+    if layer_num>2:
+        model=_generate_LSTM(model,cell_num,dropout)
     model.add(Bidirectional(GRU(cell_num)))
     model.add(Dropout(dropout))
     model.add(Dense(1,activation='sigmoid'))
 
     return model
+
+def _generate_LSTM(model,cell_num,dropout):
+    model.add(Bidirectional(GRU(cell_num,return_sequences=True)))
+    model.add(Dropout(dropout))
+    return model
+
 
 def training_model(model,trainX,trainY,epochs=5):
     '''

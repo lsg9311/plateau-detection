@@ -23,24 +23,30 @@ if __name__ == '__main__':
     menu=int_input("0 : Load trained model / 1 : Generate new model")
     if menu==0:
         model=mc.load_model(config["path"]["model_load_path"],config["path"]["weight_load_path"])
+        print("Evaluation")
+        mc.evaluate(model,env)
     elif menu==1:
-        print("Transform Data")
-        datadict=dt.transfrom_dataset(datadict,len(config["data"]["feature"]),int(config["data"]["time_slice"]))
+        if len(train_file)<=0:
+            print("Train set is empty")
+        else:
+            print("Transform Data")
+            datadict=dt.transfrom_dataset(datadict,len(config["data"]["feature"]),int(config["data"]["time_slice"]))
     
-        print("Labeling")
-        env.labeldata=lb.load_label(config["path"]["label_path"])
-        labeldict=lb.dataset_labelling(datadict,env.file["train_file"],env.labeldata)
+            print("Labeling")
+            env.labeldata=lb.load_label(config["path"]["label_path"])
+            labeldict=lb.dataset_labelling(datadict,env.file["train_file"],env.labeldata)
     
-        print("Make XY")
-        trainX,trainY=dc.make_LSTM_dataset(datadict,labeldict,int(config["data"]["look_back"]))
+            print("Make XY")
+            trainX,trainY=dc.make_LSTM_dataset(datadict,labeldict,int(config["data"]["look_back"]))
 
-        print("Generate Model")
-        model=mc.generate_model(int(config["model"]["cell_num"]),float(config["model"]["dropout"]),int(config["data"]["look_back"]))
-        print("Train Model")
-        mc.training_model(model,trainX,trainY,epochs=int(config["model"]["epoch"]))
-        print("Save Model")
-        mc.save_model(model,config["path"]["model_save_path"],config["path"]["weight_save_path"])
+            print("Generate Model")
+            model=mc.generate_model(int(config["model"]["cell_num"]),float(config["model"]["dropout"]),int(config["data"]["look_back"]),int(config["model"]["LSTM_layer"]))
+            print("Train Model")
+            mc.training_model(model,trainX,trainY,epochs=int(config["model"]["epoch"]))
+            print("Save Model")
+            mc.save_model(model,config["path"]["model_save_path"],config["path"]["weight_save_path"])
+            print("Evaluation")
+            mc.evaluate(model,env)
     else:
         print("wrong input")
-    print("Evaluation")
-    mc.evaluate(model,env)
+    
