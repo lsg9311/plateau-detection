@@ -39,6 +39,7 @@ if __name__ == '__main__':
             print("Make XY")
             trainX,trainY=dc.make_LSTM_dataset(datadict,labeldict,config)
 
+            
             print("Generate Model")
             model=mc.generate_model(int(config["model"]["cell_num"]),float(config["model"]["dropout"]),int(config["data"]["look_back"]),int(config["model"]["layer"]))
             print("Train Model")

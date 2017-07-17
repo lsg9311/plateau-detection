@@ -4,10 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Bidirectional
-from keras.layers import LSTM,GRU, Embedding
+from keras.layers import LSTM,GRU, Embedding,Flatten
 from keras.models import model_from_json
-from keras.utils.dot_utils import Grapher
-
+from keras.utils.vis_utils import plot_model
+from keras import backend as K
+from keras.regularizers import l1, l2, l1_l2
 from env import Env
 import pickle
 
@@ -30,23 +31,25 @@ def generate_model(cell_num,dropout,look_back,layer_num):
     model : keras model
         generated model
     '''
-    
-    grapher = Grapher()
-
     model = Sequential()
-    model.add(Bidirectional(GRU(cell_num,return_sequences=True),input_shape=(look_back, 1)))
+    reg={"bias":l1(0.01),"kernel":None,"rec":None}
+  
+    model.add(Bidirectional(GRU(cell_num,return_sequences=True, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"]),input_shape=(look_back, 1)))
     model.add(Dropout(dropout))
     if layer_num>2:
-        model=_generate_LSTM(model,cell_num,dropout)
-    model.add(Bidirectional(GRU(cell_num)))
+        for i in range(2,layer_num):
+            model=_generate_LSTM(model,cell_num,dropout,reg)
+    model.add(Bidirectional(GRU(cell_num, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"])))
     model.add(Dropout(dropout))
-    model.add(Dense(1,activation='sigmoid'))
-    grapher.plot(model, 'model.png')
+    model.add(Dense(cell_num,activation='relu', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"]))
+    model.add(Dense(2,activation='softmax', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"]))
+    model.summary()
+    plot_model(model, to_file='model.png')
 
     return model
 
-def _generate_LSTM(model,cell_num,dropout):
-    model.add(Bidirectional(GRU(cell_num,return_sequences=True)))
+def _generate_LSTM(model,cell_num,dropout,reg):
+    model.add(Bidirectional(GRU(cell_num,return_sequences=True, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"])))
     model.add(Dropout(dropout))
     return model
 
@@ -69,7 +72,7 @@ def training_model(model,trainX,trainY,epochs=5):
     model : keras model
         trained model
     '''
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
     for epoch in range(epochs):
         print("Epoch : "+  str(epoch)+" / "+str(epochs))
@@ -149,6 +152,14 @@ def _refine_Y(Y,threshold=0.5):
         Y[i]= 1 if cur_y>threshold else 0
     return Y
 
+def _decide_Y(Y):
+    result=[]
+    for cur_y in Y:
+        if cur_y[0]>cur_y[1]:
+            result.append(0)
+        else:
+            result.append(1)
+    return np.array(result)
 
 def evaluate(model,env):
     '''
@@ -167,6 +178,7 @@ def evaluate(model,env):
     '''
     figure_num=0
     figure_range=4
+    is_softmax=int(env.config_var["model"]["is_softmax"])
     testlist=env.file["test_file"]
     for test_idx in range(len(testlist)):
         if test_idx%figure_range==0:
@@ -176,7 +188,10 @@ def evaluate(model,env):
         testfile=testlist[test_idx]
         testX,dataX=dc.make_test_file(testfile,env)
         predY=model.predict(testX)
-        predY=_refine_Y(predY,float(env.config_var["model"]["threshold"]))
+        if is_softmax==1:
+            predY=_decide_Y(predY)
+        else:
+            predY=_refine_Y(predY,float(env.config_var["model"]["threshold"]))
         predY=predY*max(dataX[1])
 
         look_back=int(env.config_var["data"]["look_back"])

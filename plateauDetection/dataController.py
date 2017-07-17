@@ -70,13 +70,23 @@ def make_LSTM_data(data,label,config):
     timelapse=data[0]
     feature=data[1]
     dataX,dataY=[],[]
+    is_softmax=int(config["model"]["is_softmax"])
     for i in range(len(timelapse)-look_back):
         dataX.append(feature[i:i+look_back])
-        dataY.append(label[i+look_back])
+        
+        if is_softmax==1:
+            cur_Y=[0,0]
+            cur_Y[label[i+look_back]]=1
+            dataY.append(cur_Y)
+        else:
+            dataY.append(label[i+look_back])
     X,Y=np.array(dataX),np.array(dataY)
     is_emb=int(config["model"]["embedding"])
     if is_emb==0:
         X=X.reshape(X.shape[0],X.shape[1],1)
+    if is_softmax==1:
+        Y=Y.reshape(Y.shape[0],2)
+    else:
         Y=Y.reshape(Y.shape[0],1)
 
     return X,Y
