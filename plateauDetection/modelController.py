@@ -41,7 +41,7 @@ def generate_model(cell_num,dropout,look_back,layer_num):
             model=_generate_LSTM(model,cell_num,dropout,reg)
     model.add(Bidirectional(GRU(cell_num, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"],activity_regularizer=reg["activity"])))
     model.add(Dropout(dropout))
-    model.add(BatchNormalization())
+    # model.add(BatchNormalization())
     model.add(Dense(cell_num,activation='relu', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
     model.add(Dense(2,activation='softmax', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
     model.summary()
@@ -187,21 +187,22 @@ def evaluate(model,env):
             plt.figure(figure_num,figsize=(12,5*figure_range))
         plt.subplot(4*100+10+((test_idx%figure_range)+1))
         testfile=testlist[test_idx]
-        testX,dataX,true=dc.make_test_file(testfile,env) # have to change
+        testX,dataX=dc.make_test_file(testfile,env) # have to change
+        #testX,dataX,true=dc.make_test_file(testfile,env) # have to change
         
         predY=model.predict(testX)
         if is_softmax==1:
-            true=_decide_Y(true)
+            #true=_decide_Y(true)
             predY=_decide_Y(predY)
         else:
             predY=_refine_Y(predY,float(env.config_var["model"]["threshold"]))
-        true=true*max(dataX[1])
+        #true=true*max(dataX[1])
         predY=predY*max(dataX[1])
 
         look_back=int(env.config_var["data"]["look_back"])
         plt.plot(dataX[0][look_back:],dataX[1][look_back:],'b',label="ICP")
-        plt.plot(dataX[0][look_back:],true.reshape(-1),'g',label="true")
-        plt.plot(dataX[0][look_back:],predY.reshape(-1),'r--',label="prediction")
+        # plt.plot(dataX[0][look_back:],true.reshape(-1),'g',label="true")
+        plt.plot(dataX[0][look_back:],predY.reshape(-1),'r',label="prediction")
         plt.grid()
         plt.legend()
     plt.show()

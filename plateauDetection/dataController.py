@@ -143,8 +143,9 @@ def make_test_file(filepath,env):
     # simplify data
     dataX=dt.mean_simplify(dataX,len(config["data"]["feature"]),int(config["data"]["time_slice"]))
     # make LSTM data
-    labeldata=lb.load_label(config["path"]["label_path"])
-    label=lb.data_labeling(dataX,filepath,labeldata)
-    X,Y=make_LSTM_data(dataX,label,config)
+    #labeldata=lb.load_label(config["path"]["label_path"])
+    #label=lb.data_labeling(dataX,filepath,labeldata)
+    X=make_LSTM_X(dataX,config)
+    #X,Y=make_LSTM_data(dataX,label,config)
 
-    return X,dataX,Y
+    return X,dataX#,Y
