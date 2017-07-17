@@ -4,13 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Bidirectional
-from keras.layers import LSTM,GRU
+from keras.layers import LSTM,GRU, Embedding
 from keras.models import model_from_json
+from keras.utils.dot_utils import Grapher
 
 from env import Env
 import pickle
 
-def generate_model(cell_num=32,dropout=0.3,look_back=20,layer_num=3):
+def generate_model(cell_num,dropout,look_back,layer_num):
     '''
     generate the model by looking up config variable
 
@@ -29,6 +30,9 @@ def generate_model(cell_num=32,dropout=0.3,look_back=20,layer_num=3):
     model : keras model
         generated model
     '''
+    
+    grapher = Grapher()
+
     model = Sequential()
     model.add(Bidirectional(GRU(cell_num,return_sequences=True),input_shape=(look_back, 1)))
     model.add(Dropout(dropout))
@@ -37,6 +41,7 @@ def generate_model(cell_num=32,dropout=0.3,look_back=20,layer_num=3):
     model.add(Bidirectional(GRU(cell_num)))
     model.add(Dropout(dropout))
     model.add(Dense(1,activation='sigmoid'))
+    grapher.plot(model, 'model.png')
 
     return model
 
