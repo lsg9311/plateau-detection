@@ -37,7 +37,7 @@ if __name__ == '__main__':
             labeldict=lb.dataset_labelling(datadict,env.file["train_file"],labeldata)
     
             print("Make XY")
-            trainX,trainY=dc.make_LSTM_dataset(datadict,labeldict,int(config["data"]["look_back"]))
+            trainX,trainY=dc.make_LSTM_dataset(datadict,labeldict,config)
 
             print("Generate Model")
             model=mc.generate_model(int(config["model"]["cell_num"]),float(config["model"]["dropout"]),int(config["data"]["look_back"]),int(config["model"]["layer"]))

@@ -23,20 +23,24 @@ def scaling_data(data):
    
     return result
 
-def make_LSTM_X(data,look_back):
+def make_LSTM_X(data,config):
 	# scaling
     data=scaling_data(data)
     # make XY
+    look_back=int(config["data"]["look_back"])
+
     timelapse=data[0]
     feature=data[1]
     dataX=[]
     for i in range(len(timelapse)-look_back):
         dataX.append(feature[i:i+look_back])
     X=np.array(dataX)
-    X=X.reshape(X.shape[0],X.shape[1],1)
+    is_emb=int(config["model"]["embedding"])
+    if is_emb==0:
+        X=X.reshape(X.shape[0],X.shape[1],1)
     return X
 
-def make_LSTM_data(data,label,look_back):
+def make_LSTM_data(data,label,config):
     '''
     scaling the data first
     then make X, Y to train or test the LSTM model
@@ -61,6 +65,8 @@ def make_LSTM_data(data,label,look_back):
     # scaling
     data=scaling_data(data)
     # make XY
+    look_back=int(config["data"]["look_back"])
+
     timelapse=data[0]
     feature=data[1]
     dataX,dataY=[],[]
@@ -68,12 +74,14 @@ def make_LSTM_data(data,label,look_back):
         dataX.append(feature[i:i+look_back])
         dataY.append(label[i+look_back])
     X,Y=np.array(dataX),np.array(dataY)
-    X=X.reshape(X.shape[0],X.shape[1],1)
-    Y=Y.reshape(Y.shape[0],1)
+    is_emb=int(config["model"]["embedding"])
+    if is_emb==0:
+        X=X.reshape(X.shape[0],X.shape[1],1)
+        Y=Y.reshape(Y.shape[0],1)
 
     return X,Y
 
-def make_LSTM_dataset(datadict,labeldict,look_back):
+def make_LSTM_dataset(datadict,labeldict,config):
     '''
     make dict of X, Y to train or test the LSTM model
     X has the T~T+look_back-1 sequences of each file
@@ -98,7 +106,7 @@ def make_LSTM_dataset(datadict,labeldict,look_back):
     for filenum in range(len(datadict)):
         data=datadict[filenum]
         label=labeldict[filenum]
-        Xdict[filenum],Ydict[filenum]=make_LSTM_data(data,label,look_back)
+        Xdict[filenum],Ydict[filenum]=make_LSTM_data(data,label,config)
 
     return Xdict, Ydict
 
@@ -125,6 +133,6 @@ def make_test_file(filepath,env):
     # simplify data
     dataX=dt.mean_simplify(dataX,len(config["data"]["feature"]),int(config["data"]["time_slice"]))
     # make LSTM data
-    X=make_LSTM_X(dataX,int(config["data"]["look_back"]))
+    X=make_LSTM_X(dataX,config)
 
     return X,dataX

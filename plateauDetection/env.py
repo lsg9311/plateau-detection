@@ -7,12 +7,10 @@ class Env(object):
 
     Instance
     ________
-    train_file : array
-        array of training set filepath
-    test_file : array
-        array of test set filepath
-    feature : array
-        array of feature string 
+    config_var : dict
+        dictionary of configuration variable
+    file : dict
+        file path information
     """
     def __init__(self):
         self.config_var={}
@@ -36,10 +34,11 @@ class Env(object):
                self.config_var[section][option]=config.get(section,option)
         
         
-        feature_list=self.config_var["data"]["feature"].split(",")
-        self.config_var["data"]['feature']=feature_list
+        self.config_var["data"]['feature']=listify(self.config_var["data"]["feature"],",")
         
-
+def listify(var,spliter):
+    result=var.split(spliter)
+    return result
 
 def int_input(message=""):
     """
