@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Bidirectional
 from keras.layers import LSTM,GRU, Embedding,Flatten
+from keras.layers.normalization import BatchNormalization
 from keras.models import model_from_json
 from keras.utils.vis_utils import plot_model
-from keras import backend as K
 from keras.regularizers import l1, l2, l1_l2
 from env import Env
 import pickle
@@ -32,24 +32,25 @@ def generate_model(cell_num,dropout,look_back,layer_num):
         generated model
     '''
     model = Sequential()
-    reg={"bias":l1(0.01),"kernel":None,"rec":None}
+    reg={"bias":None,"kernel":l2(.01),"rec":l1_l2(.001), "activity":None}
   
-    model.add(Bidirectional(GRU(cell_num,return_sequences=True, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"]),input_shape=(look_back, 1)))
+    model.add(Bidirectional(GRU(cell_num,return_sequences=True, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"],activity_regularizer=reg["activity"]),input_shape=(look_back, 1)))
     model.add(Dropout(dropout))
     if layer_num>2:
         for i in range(2,layer_num):
             model=_generate_LSTM(model,cell_num,dropout,reg)
-    model.add(Bidirectional(GRU(cell_num, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"])))
+    model.add(Bidirectional(GRU(cell_num, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"],activity_regularizer=reg["activity"])))
     model.add(Dropout(dropout))
-    model.add(Dense(cell_num,activation='relu', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"]))
-    model.add(Dense(2,activation='softmax', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"]))
+    model.add(BatchNormalization())
+    model.add(Dense(cell_num,activation='relu', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
+    model.add(Dense(2,activation='softmax', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
     model.summary()
     plot_model(model, to_file='model.png')
 
     return model
 
 def _generate_LSTM(model,cell_num,dropout,reg):
-    model.add(Bidirectional(GRU(cell_num,return_sequences=True, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"])))
+    model.add(Bidirectional(GRU(cell_num,return_sequences=True, kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"], recurrent_regularizer=reg["rec"],activity_regularizer=reg["activity"])))
     model.add(Dropout(dropout))
     return model
 
@@ -186,17 +187,21 @@ def evaluate(model,env):
             plt.figure(figure_num,figsize=(12,5*figure_range))
         plt.subplot(4*100+10+((test_idx%figure_range)+1))
         testfile=testlist[test_idx]
-        testX,dataX=dc.make_test_file(testfile,env)
+        testX,dataX,true=dc.make_test_file(testfile,env) # have to change
+        
         predY=model.predict(testX)
         if is_softmax==1:
+            true=_decide_Y(true)
             predY=_decide_Y(predY)
         else:
             predY=_refine_Y(predY,float(env.config_var["model"]["threshold"]))
+        true=true*max(dataX[1])
         predY=predY*max(dataX[1])
 
         look_back=int(env.config_var["data"]["look_back"])
         plt.plot(dataX[0][look_back:],dataX[1][look_back:],'b',label="ICP")
-        plt.plot(dataX[0][look_back:],predY.reshape(-1),'r',label="prediction")
+        plt.plot(dataX[0][look_back:],true.reshape(-1),'g',label="true")
+        plt.plot(dataX[0][look_back:],predY.reshape(-1),'r--',label="prediction")
         plt.grid()
         plt.legend()
     plt.show()
