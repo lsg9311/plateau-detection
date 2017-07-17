@@ -33,8 +33,8 @@ if __name__ == '__main__':
             datadict=dt.transfrom_dataset(datadict,len(config["data"]["feature"]),int(config["data"]["time_slice"]))
     
             print("Labeling")
-            env.labeldata=lb.load_label(config["path"]["label_path"])
-            labeldict=lb.dataset_labelling(datadict,env.file["train_file"],env.labeldata)
+            labeldata=lb.load_label(config["path"]["label_path"])
+            labeldict=lb.dataset_labelling(datadict,env.file["train_file"],labeldata)
     
             print("Make XY")
             trainX,trainY=dc.make_LSTM_dataset(datadict,labeldict,int(config["data"]["look_back"]))

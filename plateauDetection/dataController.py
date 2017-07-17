@@ -23,6 +23,19 @@ def scaling_data(data):
    
     return result
 
+def make_LSTM_X(data,look_back):
+	# scaling
+    data=scaling_data(data)
+    # make XY
+    timelapse=data[0]
+    feature=data[1]
+    dataX=[]
+    for i in range(len(timelapse)-look_back):
+        dataX.append(feature[i:i+look_back])
+    X=np.array(dataX)
+    X=X.reshape(X.shape[0],X.shape[1],1)
+    return X
+
 def make_LSTM_data(data,label,look_back):
     '''
     scaling the data first
@@ -111,9 +124,7 @@ def make_test_file(filepath,env):
     dataX=ld.get_data(filepath,config["data"]["feature"])
     # simplify data
     dataX=dt.mean_simplify(dataX,len(config["data"]["feature"]),int(config["data"]["time_slice"]))
-    # labeling
-    dataY=lb.data_labeling(dataX,filepath,env.labeldata)
     # make LSTM data
-    X,Y=make_LSTM_data(dataX,dataY,int(config["data"]["look_back"]))
+    X=make_LSTM_X(dataX,int(config["data"]["look_back"]))
 
     return X,dataX
