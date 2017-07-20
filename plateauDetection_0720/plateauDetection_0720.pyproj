@@ -22,7 +22,25 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="env.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="labeling.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="loader.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LSTM.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="modelController.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="plateauDetection_0720.py" />
+    <Compile Include="preprocess.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
