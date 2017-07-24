@@ -33,6 +33,49 @@ def generate_LSTM(model,env,reg,is_output=False,is_input=False,has_dropout=False
 #####################
 #       data        #
 #####################
+def make_LSTM_icp_dataset(datadict,env):
+    '''
+    make dict of X, Y to train or test the LSTM model
+    X has the T~T+look_back-1 sequences of each file
+    X will predict the T+look_back value of Y
+    
+    Parameters
+    ----------
+    datadict : dictionary
+        dictionary of all data
+    labeldict : dictionary
+        label dictionary of all data
+    look_back : int
+        length of X sequence
+    Returns
+    -------
+    Xdict : dict {filenum : 3d matrix (batch_size,timestep(=lookback),1(=feature))}
+        dictionary of X matrix which can be used for LSTM model
+    Ydict : dict {filenum : array (batch_size,1(sigmoid) or 2(softmax))}
+        dictionary of Y list which can be used for LSTM model
+    '''
+    Xdict=dict(); Ydict=dict()
+    for filenum in range(len(datadict)):
+        data=datadict[filenum]
+        Xdict[filenum]=make_LSTM_X(data,env)
+        Ydict[filenum]=make_LSTM_icpY(data,env)
+
+    return Xdict, Ydict
+
+def make_LSTM_icpY(data,env):
+    # make Y
+    look_back=env.get_config("data","look_back",type="int")
+    feature_size=len(env.get_config("data","feature",type="list"))
+
+    timelapse=data[0]
+    feature=data[1]
+    dataY=[]
+    for i in range(len(timelapse)-look_back):
+        dataY.append(feature[i+look_back]) # have to change
+    Y=np.array(dataY)
+    Y=Y.reshape(Y.shape[0],1)
+    return Y
+
 def make_LSTM_dataset(datadict,labeldict,env):
     '''
     make dict of X, Y to train or test the LSTM model
@@ -67,7 +110,7 @@ def make_LSTM_dataset(datadict,labeldict,env):
 def make_LSTM_X(data,env):
 	# scaling
     data=pp.scaling_data(data)
-    # make XY
+    # make X
     look_back=env.get_config("data","look_back",type="int")
     feature_size=len(env.get_config("data","feature",type="list"))
 

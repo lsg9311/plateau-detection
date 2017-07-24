@@ -25,6 +25,9 @@
     <Compile Include="env.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="graph.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="labeling.py">
       <SubType>Code</SubType>
     </Compile>

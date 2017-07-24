@@ -1,10 +1,10 @@
-import theano
+import tensorflow
 import LSTM
 import matplotlib.pyplot as plt
 import numpy as np
 
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense, Dropout,BatchNormalization
 from keras.regularizers import l1, l2, l1_l2
 from keras.utils.vis_utils import plot_model
 from keras.models import model_from_json
@@ -31,17 +31,20 @@ def generate_model(env):
         generated model
     '''
     
-    reg={"bias":None,"kernel":l2(.01),"rec":l1_l2(.001), "activity":None}
+    reg={"bias":None,"kernel":None,"rec":None, "activity":None}# l2(.01),l1_l2(.001)
     cell_num=env.get_config("model","dense_cell_num",type="int")
-    
+    look_back=env.get_config("data","look_back",type="int")
+
     # network structure
     model = Sequential()
-    model=LSTM.generate_LSTM(model,env,reg,is_input=True,has_dropout=True)
+    #model.add(BatchNormalization(input_shape=(look_back, 1)))
+    model=LSTM.generate_LSTM(model,env,reg,is_input=True, has_dropout=True)
     model=LSTM.generate_LSTM(model,env,reg,has_dropout=True)
-    model=LSTM.generate_LSTM(model,env,reg,has_dropout=True)
+    #model=LSTM.generate_LSTM(model,env,reg,has_dropout=True)
     model=LSTM.generate_LSTM(model,env,reg,is_output=True,has_dropout=True)        
-    model.add(Dense(cell_num,activation='relu', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
-    model.add(Dense(2,activation='softmax', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
+    # model.add(Dense(cell_num,activation='sigmoid', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
+    model.add(Dense(1,activation='linear')) #,activation='linear', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
+    # model.add(Dense(2,activation='softmax', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
 
     # model structure visualize
     model.summary()
@@ -67,16 +70,16 @@ def train_model(model,env,trainX,trainY):
     model : keras model
         trained model
     '''
-    model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+    model.compile(loss='mean_squared_error', optimizer='Nadam')#, metrics=['accuracy'])
 
     epochs=env.get_config("model","epoch",type="int")
     batch_size=env.get_config("model","batch_size",type="int")
 
     for epoch in range(epochs):
-        print("Epoch : "+  str(epoch)+" / "+str(epochs))
+        print("Epoch : "+  str(epoch+1)+" / "+str(epochs))
         for i in range(len(trainX)):
             X=trainX[i]; Y=trainY[i]
-            model.fit(X, Y, epochs=1, batch_size=batch_size, verbose=2, shuffle=False)
+            model.fit(X, Y, epochs=1, batch_size=batch_size, verbose=1, shuffle=False) #len(X)
 
     return model
 
@@ -173,13 +176,13 @@ def evaluate_model(model,env):
         else:
             testX,dataX=LSTM.make_test_file(testfile,env)
         predY=model.predict(testX) 
-        predY=_decide_Y(predY) if is_softmax==1 else _refine_Y(predY,threshold)
+        # predY=_decide_Y(predY) if is_softmax==1 else _refine_Y(predY,threshold)
 
         if is_debug==1:
             f1_result=f1_result+f1_socre(true,predY)
             true=true*max(dataX[1])
 
-        predY=predY*max(dataX[1])
+        # predY=predY*max(dataX[1])
 
         plt.plot(dataX[0][look_back:],dataX[1][look_back:],'b',label="ICP")
         if is_debug==1:

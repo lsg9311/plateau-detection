@@ -31,6 +31,7 @@ def get_data_from_filelist(filelist,feature=[]):
     for filenum in range(len(filelist)):
         file=filelist[filenum]
         datadict[filenum]=get_data(file,feature)
+
     return datadict
 
 def get_data(filename,feature=[]):
