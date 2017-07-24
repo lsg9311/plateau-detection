@@ -66,12 +66,13 @@ def make_LSTM_icpY(data,env):
     # make Y
     look_back=env.get_config("data","look_back",type="int")
     feature_size=len(env.get_config("data","feature",type="list"))
+    future=env.get_config("data","future",type="int")
 
     timelapse=data[0]
     feature=data[1]
     dataY=[]
-    for i in range(len(timelapse)-look_back):
-        dataY.append(feature[i+look_back]) # have to change
+    for i in range(len(timelapse)-look_back-future):
+        dataY.append(feature[i+look_back+future]) # have to change
     Y=np.array(dataY)
     Y=Y.reshape(Y.shape[0],1)
     return Y
@@ -113,11 +114,12 @@ def make_LSTM_X(data,env):
     # make X
     look_back=env.get_config("data","look_back",type="int")
     feature_size=len(env.get_config("data","feature",type="list"))
+    future=env.get_config("data","future",type="int")
 
     timelapse=data[0]
     feature=data[1]
     dataX=[]
-    for i in range(len(timelapse)-look_back):
+    for i in range(len(timelapse)-look_back-future):
         dataX.append(feature[i:i+look_back]) # have to change
     X=np.array(dataX)
     X=X.reshape(X.shape[0],X.shape[1],1)
