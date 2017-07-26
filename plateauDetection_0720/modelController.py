@@ -170,10 +170,12 @@ def evaluate_model(model,env):
     f1_result=0
     threshold=env.get_config("model","threshold",type="float")
 
-    labeltime=np.empty((0,2))
+    # labeltime=np.empty((0,2))
     
     for test_idx in range(len(testlist)):
         if test_idx%figure_range==0:
+            if figure_num>0:
+                plt.savefig('./result/result'+str(figure_num)+'.png')
             figure_num=figure_num+1
             plt.figure(figure_num,figsize=(12,5*figure_range))
         plt.subplot(4*100+10+((test_idx%figure_range)+1))
@@ -189,8 +191,9 @@ def evaluate_model(model,env):
         predY=model.predict(testX) 
         predY=_decide_Y(predY) if is_softmax==1 else _refine_Y(predY,threshold)
 
+        '''
         curtime=lm.find_label_time(dataX[0][look_back+future:],predY)
-        labeltime=np.vstack((labeltime,curtime))
+        labeltime=np.vstack((labeltime,curtime))'''
 
         if is_debug==1:
             f1_result=f1_result+f1_score(true,predY)
@@ -202,14 +205,13 @@ def evaluate_model(model,env):
         if is_debug==1:
             plt.plot(dataX[0][look_back+future:],true.reshape(-1),'g',label="true")
         plt.plot(dataX[0][look_back+future:],predY.reshape(-1),'r',label="prediction")
-        plt.ylim(0,)
         plt.grid()
         plt.legend()
     if is_debug==1:
         print("F1 RESULT : "+str(f1_result))
-    print(labeltime)
-    lm.time_to_file(labeltime,env)
-    plt.show()
+    # print(labeltime)
+    # lm.time_to_file(labeltime,env)
+    plt.savefig('./result/result'+str(figure_num)+'.png')
 
 def _refine_Y(Y,threshold=0.5): # for sigmoid
     for i in range(len(Y)):

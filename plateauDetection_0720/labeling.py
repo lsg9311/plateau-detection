@@ -77,12 +77,9 @@ def data_labeling(data,file_name,labeldata):
     
     label=[]
     time_lapse=data[0]
-    print(labeltime)
-    print(time_lapse[-1])
     for i in range(len(time_lapse)):
         time=time_lapse[i]
         is_pl=0
-        # print(time)
         for j in range(len(labeltime)):
             pl_start=labeltime[j][0]
             pl_end=labeltime[j][1]
