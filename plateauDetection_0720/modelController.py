@@ -2,6 +2,8 @@ import tensorflow
 import LSTM
 import matplotlib.pyplot as plt
 import numpy as np
+import sklearn.metrics
+import labelmaker as lm
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout,BatchNormalization
@@ -43,8 +45,7 @@ def generate_model(env):
     #model=LSTM.generate_LSTM(model,env,reg,has_dropout=True)
     model=LSTM.generate_LSTM(model,env,reg,is_output=True,has_dropout=True)        
     # model.add(Dense(cell_num,activation='sigmoid', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
-    model.add(Dense(1,activation='linear')) #,activation='linear', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
-    # model.add(Dense(2,activation='softmax', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
+    model.add(Dense(2,activation='softmax', kernel_regularizer=reg["kernel"], bias_regularizer=reg["bias"],activity_regularizer=reg["activity"]))
 
     # model structure visualize
     model.summary()
@@ -70,18 +71,24 @@ def train_model(model,env,trainX,trainY):
     model : keras model
         trained model
     '''
-    model.compile(loss='mean_squared_error', optimizer='Nadam')#, metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='Nadam')#, metrics=['accuracy'])
 
     epochs=env.get_config("model","epoch",type="int")
     batch_size=env.get_config("model","batch_size",type="int")
 
     for epoch in range(epochs):
         print("Epoch : "+  str(epoch+1)+" / "+str(epochs))
-        for i in range(len(trainX)):
+        order=_shuffle_order(len(trainX))
+        for i in order:
             X=trainX[i]; Y=trainY[i]
-            model.fit(X, Y, epochs=1, batch_size=batch_size, verbose=1, shuffle=False) #len(X)
+            model.fit(X, Y, epochs=1, batch_size=batch_size, verbose=2, shuffle=False) #len(X)
 
     return model
+
+def _shuffle_order(size):
+    order=np.arange(size)
+    np.random.shuffle(order)
+    return order
 
 def save_model(model,env):
     '''
@@ -156,11 +163,15 @@ def evaluate_model(model,env):
     is_softmax=env.get_config("model","is_softmax",type="int")
     is_debug=env.get_config("system","debug",type="int")
     look_back=env.get_config ("data","look_back",type="int")
+    future=env.get_config("data","future",type="int")
+
 
     testlist=env.file["test_file_list"]
     f1_result=0
     threshold=env.get_config("model","threshold",type="float")
 
+    labeltime=np.empty((0,2))
+    
     for test_idx in range(len(testlist)):
         if test_idx%figure_range==0:
             figure_num=figure_num+1
@@ -176,22 +187,28 @@ def evaluate_model(model,env):
         else:
             testX,dataX=LSTM.make_test_file(testfile,env)
         predY=model.predict(testX) 
-        # predY=_decide_Y(predY) if is_softmax==1 else _refine_Y(predY,threshold)
+        predY=_decide_Y(predY) if is_softmax==1 else _refine_Y(predY,threshold)
+
+        curtime=lm.find_label_time(dataX[0][look_back+future:],predY)
+        labeltime=np.vstack((labeltime,curtime))
 
         if is_debug==1:
-            f1_result=f1_result+f1_socre(true,predY)
+            f1_result=f1_result+f1_score(true,predY)
             true=true*max(dataX[1])
 
-        # predY=predY*max(dataX[1])
+        predY=predY*max(dataX[1])
 
-        plt.plot(dataX[0][look_back:],dataX[1][look_back:],'b',label="ICP")
+        plt.plot(dataX[0][look_back+future:],dataX[1][look_back+future:],'b',label="ICP")
         if is_debug==1:
-            plt.plot(dataX[0][look_back:],true.reshape(-1),'g',label="true")
-        plt.plot(dataX[0][look_back:],predY.reshape(-1),'r',label="prediction")
+            plt.plot(dataX[0][look_back+future:],true.reshape(-1),'g',label="true")
+        plt.plot(dataX[0][look_back+future:],predY.reshape(-1),'r',label="prediction")
+        plt.ylim(0,)
         plt.grid()
         plt.legend()
     if is_debug==1:
         print("F1 RESULT : "+str(f1_result))
+    print(labeltime)
+    lm.time_to_file(labeltime,env)
     plt.show()
 
 def _refine_Y(Y,threshold=0.5): # for sigmoid

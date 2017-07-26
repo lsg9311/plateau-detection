@@ -19,8 +19,6 @@ if __name__ == '__main__':
     env.file["train_file_list"]=train_file
     env.file["test_file_list"]=test_file
 
-    print(datadict)
-
     menu=int_input("0 : Load trained model / 1 : Generate new model")
     if menu==0:
         
@@ -36,15 +34,14 @@ if __name__ == '__main__':
             time_slice=env.get_config("data","time_slice",type="int")
             datadict=pp.transfrom_dataset(datadict,feature_size,time_slice)
 
-            '''
+            
             print("Labeling")
             label_path=env.get_config("path","label_path")
             labeldata=lb.load_label(label_path)
             labeldict=lb.dataset_labelling(datadict,env.file["train_file_list"],labeldata)
-            '''
-
+            
             print("Make XY")
-            trainX,trainY=LSTM.make_LSTM_icp_dataset(datadict,env) #make_LSTM_dataset(datadict,labeldict,env)
+            trainX,trainY=LSTM.make_LSTM_dataset(datadict,labeldict,env) #make_LSTM_icp_dataset(datadict,env)
 
             print("Generate Model")
             model=mc.generate_model(env)

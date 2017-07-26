@@ -25,10 +25,10 @@
     <Compile Include="env.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="graph.py">
+    <Compile Include="labeling.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="labeling.py">
+    <Compile Include="labelmaker.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="loader.py">

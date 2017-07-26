@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import re
 
 # load label file (=plateau time information)
 def load_label(labelfile):
@@ -36,11 +37,18 @@ def get_label_time(labeldata,file_name):
     labeltime : matrix(label * (start,end))
         start & end time of one file
     """
+    # file_name parsing
+    start_idx=file_name.find("\\")+1
+    end_idx=file_name.find("_")
+    #file_name=int(file_name[start_idx:end_idx])
+
     labeltime=np.empty((0,2))
     for label_row in labeldata:
         cur_row_name=label_row[0]
-        # if filename == data's filename
-        if cur_row_name in file_name :
+        # row_name parsing
+        # cur_row_name = int(re.findall('\d+', cur_row_name)[0])
+        #if cur_row_name == file_name :
+        if cur_row_name in file_name:
             labeltime=np.vstack((labeltime,label_row[2:4]))
     
     return labeltime
@@ -66,12 +74,15 @@ def data_labeling(data,file_name,labeldata):
 
     # get time data
     labeltime=get_label_time(labeldata,file_name)
-
+    
     label=[]
     time_lapse=data[0]
+    print(labeltime)
+    print(time_lapse[-1])
     for i in range(len(time_lapse)):
         time=time_lapse[i]
         is_pl=0
+        # print(time)
         for j in range(len(labeltime)):
             pl_start=labeltime[j][0]
             pl_end=labeltime[j][1]
