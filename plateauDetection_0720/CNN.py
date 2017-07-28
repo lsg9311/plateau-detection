@@ -97,21 +97,23 @@ def generate_cnn_autoencoder(x_range=900,y_range=110,encoded_dim=32):
 def result_imgdict(model,imgdict):
     for imgidx in range(len(imgdict)):
         imgset=imgdict[imgidx]
-        predict_img(model,imgdict,dir=imgidx)
+        # save_imgs(imgset,dir=imgidx)
+        predict_img(model,imgset,dir=imgidx)
 
 def predict_img(model,imgset,dir="result"):
-    preds=model.predict(imgset.reshape(imgset.shape[0],imgset.shape[1],imgset.shape[2],1))
+    testX=make_cnn_X(imgset)
+    preds=model.predict(testX)
     preds=np.uint64(preds*255)
     for pred_idx in range(len(preds)):
         pred=preds[pred_idx]
         result=np.reshape(pred,(pred.shape[0],pred.shape[1]))
         plt.clf()
         plt.imshow(result,origin="lower")
-        plt.savefig("./result/autoencoder/"+str(dir)+"_"+str(pred_idx))
+        plt.savefig("./result/autoencoder/pred/"+str(dir)+"_"+str(pred_idx))
 
-def save_imgs(imgset):
+def save_imgs(imgset,dir="result"):
     for img_idx in range(len(imgset)):
         img=imgset[img_idx]
         plt.clf()
         plt.imshow(img,origin="lower")
-        plt.savefig("./result/autoencoder/35_1_original/"+str(img_idx))
+        plt.savefig("./result/autoencoder/true/"+str(dir)+"_"+str(img_idx))

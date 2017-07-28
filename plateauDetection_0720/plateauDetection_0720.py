@@ -22,7 +22,7 @@ if __name__ == '__main__':
     
     if menu==0:
         model=mc.load_model(env)
-        imgfiles=ld._get_filelist("./data/test")
+        imgfiles=ld._get_filelist("./data/train")
         testdict=ld.load_npimg(imgfiles)
         CNN.result_imgdict(model,testdict)
     if menu==1:
