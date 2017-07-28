@@ -12,20 +12,21 @@ if __name__ == '__main__':
     env=Env()
     env.load_config("./config.ini")
 
-
     print("Start Operation")
     print("Load Data")
     train_file,test_file,datadict=ld.data_load(env) # ./data = data file directory
     env.file["train_file_list"]=train_file
     env.file["test_file_list"]=test_file
 
-    menu=int_input("0 : Load trained model / 1 : Generate new model")
+    menu=int_input("0 : Load trained model / 1 : Generate new model / 2 : Get label")
     if menu==0:
         
         model=mc.load_model(env)
         print("Evaluation")
         mc.evaluate_model(model,env)
-    elif menu==1:
+    elif (menu==1) or (menu==2) :
+        if menu==2:
+            env.config["system"]["label"]=1
         if len(train_file)<=0:
             print("Train set is empty")
         else:

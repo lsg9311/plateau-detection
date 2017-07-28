@@ -154,3 +154,11 @@ def data_load(env):
     datadict=get_data_from_filelist(trainlist,feature)
 
     return trainlist, testlist, datadict
+
+def load_npimg(filelist):
+    imgdict=dict()
+    for fileidx in len(filelist):
+        file=filelist[fileidx]
+        imgset=np.load(file)
+        imgdict[fileidx]=imgset
+    return imgdict
