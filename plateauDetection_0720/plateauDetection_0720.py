@@ -1,12 +1,16 @@
 # custome module
 import loader as ld
-import preprocess as pp
-import labeling as lb
-import LSTM
+#import preprocess as pp
+#import labeling as lb
+#import LSTM
 import modelController as mc
+import CNN
+import numpy as np
+import gc
 
 from env import Env
 from env import int_input
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     env=Env()
@@ -14,10 +18,31 @@ if __name__ == '__main__':
 
     print("Start Operation")
     print("Load Data")
+    menu=int_input("0 : Load trained model / 1 : Generate new model")
+    
+    if menu==0:
+        model=mc.load_model(env)
+        imgfiles=ld._get_filelist("./data/test")
+        testdict=ld.load_npimg(imgfiles)
+        CNN.result_imgdict(model,testdict)
+    if menu==1:
+        imgfiles=ld._get_filelist("./data/train")
+        traindict=ld.load_npimg(imgfiles)
+    
+        model=CNN.generate_cnn_autoencoder()
+        trainX=CNN.make_cnn_X_all(traindict)
+        gc.collect()
+   
+        model=CNN.train_encoder(model,trainX)
+        mc.save_model(model,env)
+   
+    
+    '''
     train_file,test_file,datadict=ld.data_load(env) # ./data = data file directory
     env.file["train_file_list"]=train_file
     env.file["test_file_list"]=test_file
 
+    
     menu=int_input("0 : Load trained model / 1 : Generate new model / 2 : Get label")
     if menu==0:
         
@@ -54,3 +79,4 @@ if __name__ == '__main__':
             mc.evaluate_model(model,env)
     else:
         print("wrong input")
+    '''

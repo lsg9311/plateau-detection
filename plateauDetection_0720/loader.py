@@ -157,7 +157,7 @@ def data_load(env):
 
 def load_npimg(filelist):
     imgdict=dict()
-    for fileidx in len(filelist):
+    for fileidx in range(len(filelist)):
         file=filelist[fileidx]
         imgset=np.load(file)
         imgdict[fileidx]=imgset
