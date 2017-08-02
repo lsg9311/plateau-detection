@@ -88,7 +88,7 @@ def train_model(model,env,trainX,trainY):
         order=_shuffle_order(len(trainX))
         for i in order:
             X=trainX[i]; Y=trainY[i]
-            model.fit(X, Y, epochs=1, batch_size=len(X), verbose=2, shuffle=False) #len(X)
+            model.fit(X, Y, epochs=1, batch_size=900, verbose=2, shuffle=False) #len(X)
 
     return model
 
@@ -117,7 +117,7 @@ def save_model(model,env):
     with open(json_path, "w") as json_file:
         json_file.write(model_json)
     # serialize weights to HDF5
-    model.save_weights(h5_path)
+    model.save_weights(h5_path,overwrite="True")
     print("Saved model to disk")
 
 def load_model(env):
@@ -166,7 +166,7 @@ def evaluate_model(model,env):
         Environment of this system
     '''
     figure_num=0
-    figure_range=4
+    figure_range=5
     is_softmax=env.get_config("model","is_softmax",type="int")
     is_debug=env.get_config("system","debug",type="int")
     is_label=env.get_config("system","label",type="int")

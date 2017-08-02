@@ -1,5 +1,5 @@
-from keras.layers import Input, Dense, Conv2D, MaxPooling2D, UpSampling2D, Conv2DTranspose
-from keras.models import Model
+from keras.layers import Input, Dense, Conv2D, MaxPooling2D, UpSampling2D, Conv2DTranspose, Flatten
+from keras.models import Model, Sequential
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -82,12 +82,12 @@ def train_encoder(model,img):
     return model
 
 def generate_cnn_autoencoder(x_range=900,y_range=110,encoded_dim=32):
-    input_img = Input(shape=(y_range, x_range, 1))
-    x = Conv2D(10, 5, activation='relu', padding='same')(input_img)
-    x = MaxPooling2D((2, 2), padding='same')(x)
-    encoded = Dense(encoded_dim)(x)
+    input_img = Input(shape=(y_range, x_range, 1),name='input_1')
+    x = Conv2D(10, 5, activation='relu', padding='same', name='conv_1')(input_img)
+    x = MaxPooling2D((2, 2), padding='same', name='pool_1')(x)
+    encoded = Dense(encoded_dim,name='encoded')(x)
     
-    x = UpSampling2D((2, 2))(x)
+    x = UpSampling2D((2, 2))(encoded)
     decoded = Conv2DTranspose(1, 5, activation='sigmoid', padding='same')(x)
     
     autoencoder = Model(input_img, decoded)
@@ -97,7 +97,7 @@ def generate_cnn_autoencoder(x_range=900,y_range=110,encoded_dim=32):
 def result_imgdict(model,imgdict):
     for imgidx in range(len(imgdict)):
         imgset=imgdict[imgidx]
-        # save_imgs(imgset,dir=imgidx)
+        save_imgs(imgset,dir=imgidx)
         predict_img(model,imgset,dir=imgidx)
 
 def predict_img(model,imgset,dir="result"):
@@ -117,3 +117,29 @@ def save_imgs(imgset,dir="result"):
         plt.clf()
         plt.imshow(img,origin="lower")
         plt.savefig("./result/autoencoder/true/"+str(dir)+"_"+str(img_idx))
+
+def reorganize_model(env):
+    model=Sequential()
+    model.add(Conv2D(10, 5, activation='relu', padding='same',input_shape=(110, 900, 1), name='conv_1'))
+    model.add(MaxPooling2D((2, 2), padding='same', name='pool_1'))
+    model.add(Dense(32,name='encoded'))
+    
+    model.add(Conv2D(10, 5, activation='relu', padding='same'))
+    model.add(Conv2D(10, 5, activation='relu', padding='same'))
+    model.add(Flatten())
+    model.add(Dense(1,activation='sigmoid'))
+
+    h5_path=env.get_config("path","weight_load_path")
+    model.load_weights(h5_path,by_name=True)
+
+    '''
+    for layer in model.layers[:3]:
+        layer.trainable = False
+    '''
+    return model
+
+def train_model(model,trainX,trainY):
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop')
+    model.fit(trainX, trainY, epochs=20, batch_size=100, verbose=1, shuffle=True)
+
+    return model
