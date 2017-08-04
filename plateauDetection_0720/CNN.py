@@ -75,6 +75,19 @@ def make_cnn_X_all(imgdict):
             result.append(result_img)
     return np.array(result)
 
+def test_cnn_X(imgdict):
+    result=dict()
+    for setidx in range(len(imgdict)):
+        imgset=imgdict[setidx]
+        curimg=[]
+        for idx in range(len(imgset)):
+            img=imgset[idx]
+            result_img=np.array(img).astype('float32')/255
+            result_img=np.reshape(result_img,(result_img.shape[0],result_img.shape[1],1))
+            curimg.append(result_img)
+        result[setidx]=np.array(curimg)
+    return result
+
 def train_encoder(model,img):
     model.compile(optimizer='adam', loss='mean_squared_error')
     model.fit(img, img, epochs=20, batch_size=1000, verbose=1, shuffle=True)
@@ -132,10 +145,6 @@ def reorganize_model(env):
     h5_path=env.get_config("path","weight_load_path")
     model.load_weights(h5_path,by_name=True)
 
-    '''
-    for layer in model.layers[:3]:
-        layer.trainable = False
-    '''
     return model
 
 def train_model(model,trainX,trainY):
@@ -143,3 +152,4 @@ def train_model(model,trainX,trainY):
     model.fit(trainX, trainY, epochs=20, batch_size=100, verbose=1, shuffle=True)
 
     return model
+

@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     print("Start Operation")
     print("Load Data")
-    '''
+
     menu=int_input("0 : test pre_trained model / 1 : Pre-training / 2 : Generate post model / 3 : Post-training / 4 : Test Model")
     
     if menu==0:
@@ -63,9 +63,11 @@ if __name__ == '__main__':
         model.summary()
         imgfiles=ld._get_filelist("./data/test")
         testdict=ld.load_npimg(imgfiles)
-        testX=CNN.make_cnn_X_all(testdict)
-        pred=model.predict(testX)
-        pred=mc._refine_Y(pred,threshold=0.5)
+        testX=CNN.test_cnn_X(testdict)
+        pred=dict()
+        for i in range(len(testX)):
+            p=model.predict(testX[i])
+            pred[i]=mc._refine_Y(p,threshold=0.5)
         np.save("prediction",pred)
     '''
 
@@ -111,4 +113,4 @@ if __name__ == '__main__':
             mc.evaluate_model(model,env)
     else:
         print("wrong input")
-    
+        '''

@@ -179,7 +179,7 @@ def evaluate_model(model,env):
     threshold=env.get_config("model","threshold",type="float")
 
     labeltime=np.empty((0,2))
-    
+    confusion=np.zeros(4)
     for test_idx in range(len(testlist)):
         if test_idx%figure_range==0:
             #if figure_num>0:
@@ -197,7 +197,6 @@ def evaluate_model(model,env):
         else:
             testX,dataX=LSTM.make_test_file(testfile,env)
         predY=model.predict(testX) 
-        print (predY)
         predY=_decide_Y(predY) if is_softmax==1 else _refine_Y(predY,threshold)
 
         if is_label==1:
@@ -205,7 +204,7 @@ def evaluate_model(model,env):
             labeltime=np.vstack((labeltime,curtime))
 
         if is_debug==1:
-            f1_result=f1_result+f1_score(true,predY)
+            confusion=confusion+eval_confusion(true,predY)
             true=true*max(dataX[1])
         predY=predY*max(dataX[1])
 
@@ -216,7 +215,8 @@ def evaluate_model(model,env):
         plt.grid()
         plt.legend()
     if is_debug==1:
-        print("F1 RESULT : "+str(f1_result))
+        #print("F1 RESULT : "+str(f1_result))
+        print(confusion)
     if is_label==1:
         print(labeltime)
         # lm.time_to_file(labeltime,env)
@@ -237,3 +237,25 @@ def _decide_Y(Y): # for softmax
         else:
             result.append(1)
     return np.array(result)
+
+def eval_confusion(true, pred):
+    if len(true)!=len(pred):
+        print("Wrong Input")
+        return
+    tp=0; tn=0; fp=0; fn=0
+    for i in range(len(true)):
+        if true[i]==pred[i]:
+            if true[i]==0:
+                tn=tn+1
+            else:
+                tp=tp+1
+        else:
+            if pred[i]==0:
+                fn=fn+1
+            else:
+                fp=fp+1    
+    print("TP : "+str(tp))
+    print("TN : "+str(tn))
+    print("FP : "+str(fp))
+    print("FN : "+str(fn))
+    return np.array([tp,tn,fp,fn])

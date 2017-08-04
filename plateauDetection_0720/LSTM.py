@@ -171,7 +171,7 @@ def make_test_file(filepath,env):
     # load data
     dataX=ld.get_data(filepath,feature)
     # simplify data
-    dataX=pp.mean_simplify(dataX,len(feature),time_slice)
+    # dataX=pp.mean_simplify(dataX,len(feature),time_slice)
     
     #make LSTM data
     X = make_LSTM_X(dataX,env)
